@@ -2,67 +2,64 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academic Research Portal</title>
+    <title>System Dashboard</title>
     <style>
         body { margin: 0; background: #000; color: #0f0; font-family: monospace; overflow: hidden; }
         #screen_container { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
-        #status { position: fixed; top: 10px; left: 10px; z-index: 10; font-size: 12px; background: rgba(0,0,0,0.5); }
-        canvas { cursor: crosshair; }
+        #status { position: fixed; top: 10px; left: 10px; z-index: 10; font-size: 12px; }
     </style>
 </head>
 <body>
 
-    <div id="status">System: Initializing Hardware...</div>
+    <div id="status">System: Initializing...</div>
     <div id="screen_container">
         <div id="screen"></div>
     </div>
 
-    <script type="module">
-        // Import the library as a module to ensure it's ready
-        import './libv86.js';
+    <script src="https://lib.arvancloud.ir/v86/0.12.0/libv86.js" onload="startEmulator()" onerror="handleLoadError()"></script>
 
-        // Panic Switch: Press "~" to instantly hide the screen
+    <script>
+        // Panic Key: Press "~" to escape instantly
         window.addEventListener("keydown", function(e) {
-            if (e.key === "~") window.location.replace("https://www.google.com/search?q=calculus+notation");
+            if (e.key === "~") window.location.replace("https://www.google.com");
         });
 
-        window.onload = function() {
-            const status = document.getElementById("status");
+        function handleLoadError() {
+            document.getElementById("status").innerHTML = "<span style='color:red;'>Filter Block Detected. Try using a personal hotspot or renaming libv86.js to libv86.png.</span>";
+        }
 
+        function startEmulator() {
+            const status = document.getElementById("status");
+            
             if (typeof V86Starter === "undefined") {
-                status.innerHTML = "<span style='color:red;'>Error: libv86.js not found in repo.</span>";
+                status.innerText = "Internal Error: Library failed to parse.";
                 return;
             }
 
-            status.innerText = "System: Booting Android (Please wait 2-3 mins)...";
+            status.innerText = "Downloading Android OS... (Stay on this tab)";
 
-            try {
-                var emulator = new V86Starter({
-                    wasm_path: "v86.wasm",
-                    memory_size: 512 * 1024 * 1024,
-                    vga_memory_size: 16 * 1024 * 1024,
-                    screen_container: document.getElementById("screen"),
-                    
-                    // These must be in a folder named 'bios' in your GitHub
-                    bios: { url: "bios/seabios.bin" },
-                    vga_bios: { url: "bios/vgabios.bin" },
-                    
-                    // Lightweight Android 4.4 (KitKat) - Stable for browsers
-                    cdrom: { url: "https://archive.org/download/android-x86-4.4-r5/android-x86-4.4-r5.iso" },
-                    
-                    autostart: true,
-                });
+            var emulator = new V86Starter({
+                // Using the official WASM build
+                wasm_path: "https://copy.sh/v86/build/v86.wasm",
+                memory_size: 512 * 1024 * 1024,
+                vga_memory_size: 16 * 1024 * 1024,
+                screen_container: document.getElementById("screen"),
+                
+                // Essential BIOS files
+                bios: { url: "https://copy.sh/v86/bios/seabios.bin" },
+                vga_bios: { url: "https://copy.sh/v86/bios/vgabios.bin" },
+                
+                // Android 4.4 r5 ISO - This is the "Playable" file
+                cdrom: { url: "https://archive.org/download/android-x86-4.4-r5/android-x86-4.4-r5.iso" },
+                
+                autostart: true,
+            });
 
-                // Hide status once the emulator screen appears
-                emulator.add_listener("emulator-ready", function() {
-                    status.style.display = "none";
-                });
-
-            } catch (e) {
-                status.innerText = "Boot Error: " + e.message;
-            }
-        };
+            emulator.add_listener("emulator-ready", function() {
+                status.style.display = "none";
+                console.log("Android is running.");
+            });
+        }
     </script>
 </body>
 </html>
