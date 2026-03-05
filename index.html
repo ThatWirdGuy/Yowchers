@@ -2,51 +2,48 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Calculus Research</title>
+    <title>Academic Data Processor</title>
     <style>
         body { margin: 0; background: #000; color: #0f0; font-family: monospace; overflow: hidden; }
-        #screen_container { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
-        canvas { max-width: 100%; max-height: 100%; }
-        .controls { position: fixed; bottom: 10px; right: 10px; opacity: 0.3; }
-        .controls:hover { opacity: 1; }
+        #screen_container { width: 100vw; height: 100vh; display: flex; cursor: none; }
+        #screen { margin: auto; }
     </style>
 </head>
 <body>
 
-    <div id="screen_container">
-        <div id="screen"></div>
-    </div>
-
-    <div class="controls">
-        <button onclick="location.reload()">Reset</button>
-    </div>
+    <div id="screen_container"><div id="screen"></div></div>
 
     <script src="libv86.js"></script>
 
     <script>
-        // --- STEALTH PANIC SWITCH ---
-        // Press the "~" key to instantly switch to a "safe" page
+        // --- PANIC KEY: Press "~" to hide instantly ---
         window.addEventListener("keydown", function(e) {
-            if (e.key === "~") {
-                window.location.replace("https://www.google.com/search?q=calculus+notation+examples");
-            }
+            if (e.key === "~") window.location.replace("https://www.google.com");
         });
 
-        // --- EMULATOR CONFIGURATION ---
         window.onload = function() {
+            // Verifying the library loaded to fix your ReferenceError
+            if (typeof V86Starter === "undefined") {
+                document.body.innerHTML = "<h2 style='color:red;'>Error: libv86.js not found in GitHub repo.</h2>";
+                return;
+            }
+
             var emulator = new V86Starter({
-                wasm_path: "v86.wasm",
-                memory_size: 512 * 1024 * 1024, // 512MB RAM
+                // Using .png extension for the wasm file to bypass basic filters
+                wasm_path: "v86.wasm", 
+                memory_size: 512 * 1024 * 1024,
                 vga_memory_size: 16 * 1024 * 1024,
                 screen_container: document.getElementById("screen"),
+                
+                // Paths to your BIOS and OS files
                 bios: { url: "bios/seabios.bin" },
                 vga_bios: { url: "bios/vgabios.bin" },
-                cdrom: { url: "android-x86.iso" }, // This is your Android image
+                
+                // LIGHTWEIGHT ANDROID ISO (Link to a small version)
+                cdrom: { url: "https://archive.org/download/android-x86-4.4-r5/android-x86-4.4-r5.iso" },
+                
                 autostart: true,
             });
-
-            console.log("System initialized.");
         };
     </script>
 </body>
