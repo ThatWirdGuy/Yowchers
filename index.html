@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Academic Research Portal</title>
+    <style>
+        body { margin: 0; background: #1a1a1a; color: white; font-family: sans-serif; }
+        #screen { width: 100vw; height: 100vh; cursor: crosshair; }
+        canvas { display: block; margin: 0 auto; }
+    </style>
+</head>
+<body>
+
+    <div id="screen"></div>
+
+    <script src="libv86.js"></script>
+    <script>
+        // Emergency Panic Switch
+        window.addEventListener("keydown", function(e) {
+            if (e.key === "~") {
+                window.location.replace("https://www.google.com/search?q=calculus+notation+examples");
+            }
+        });
+
+        // Emulator Initialization
+        var emulator = new V86Starter({
+            wasm_path: "v86.wasm",
+            memory_size: 512 * 1024 * 1024, // 512MB RAM
+            vga_memory_size: 16 * 1024 * 1024,
+            screen_container: document.getElementById("screen"),
+            bios: { url: "bios/seabios.bin" },
+            cdrom: { url: "android-x86.iso" }, // Your Android Image
+            autostart: true,
+        });
+    </script>
+</body>
+</html>
