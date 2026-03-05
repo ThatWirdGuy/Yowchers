@@ -2,68 +2,67 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Academic Data Analysis</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Research Portal</title>
     <style>
         body { margin: 0; background: #000; color: #0f0; font-family: monospace; overflow: hidden; }
         #screen_container { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
-        #status { position: fixed; top: 10px; left: 10px; z-index: 10; font-size: 12px; }
+        #status { position: fixed; top: 10px; left: 10px; z-index: 10; font-size: 12px; background: rgba(0,0,0,0.5); }
+        canvas { cursor: crosshair; }
     </style>
 </head>
 <body>
 
-    <div id="status">System: Initializing...</div>
+    <div id="status">System: Initializing Hardware...</div>
     <div id="screen_container">
         <div id="screen"></div>
     </div>
 
-    <script src="https://copy.sh/v86/build/libv86.js"></script>
+    <script type="module">
+        // Import the library as a module to ensure it's ready
+        import './libv86.js';
 
-    <script>
-        // Panic Key: Press "~" to escape
+        // Panic Switch: Press "~" to instantly hide the screen
         window.addEventListener("keydown", function(e) {
-            if (e.key === "~") window.location.replace("https://www.google.com");
+            if (e.key === "~") window.location.replace("https://www.google.com/search?q=calculus+notation");
         });
 
-        function startEmulator() {
+        window.onload = function() {
             const status = document.getElementById("status");
-            
-            // Checking if V86Starter exists
+
             if (typeof V86Starter === "undefined") {
-                status.innerText = "Error: V86 Library missing. Retrying...";
-                setTimeout(startEmulator, 1000); // Retry after 1 second
+                status.innerHTML = "<span style='color:red;'>Error: libv86.js not found in repo.</span>";
                 return;
             }
 
-            status.innerText = "System: Loading Android OS (This takes 2-5 mins)...";
+            status.innerText = "System: Booting Android (Please wait 2-3 mins)...";
 
             try {
                 var emulator = new V86Starter({
-                    wasm_path: "https://copy.sh/v86/build/v86.wasm",
+                    wasm_path: "v86.wasm",
                     memory_size: 512 * 1024 * 1024,
                     vga_memory_size: 16 * 1024 * 1024,
                     screen_container: document.getElementById("screen"),
                     
-                    // Standard BIOS files
-                    bios: { url: "https://copy.sh/v86/bios/seabios.bin" },
-                    vga_bios: { url: "https://copy.sh/v86/bios/vgabios.bin" },
+                    // These must be in a folder named 'bios' in your GitHub
+                    bios: { url: "bios/seabios.bin" },
+                    vga_bios: { url: "bios/vgabios.bin" },
                     
-                    // LIGHTWEIGHT ANDROID 4.4 ISO
+                    // Lightweight Android 4.4 (KitKat) - Stable for browsers
                     cdrom: { url: "https://archive.org/download/android-x86-4.4-r5/android-x86-4.4-r5.iso" },
                     
                     autostart: true,
                 });
 
+                // Hide status once the emulator screen appears
                 emulator.add_listener("emulator-ready", function() {
                     status.style.display = "none";
                 });
 
             } catch (e) {
-                status.innerText = "Crashed: " + e.message;
+                status.innerText = "Boot Error: " + e.message;
             }
-        }
-
-        // Start when the page is fully ready
-        window.addEventListener("load", startEmulator);
+        };
     </script>
 </body>
 </html>
