@@ -2,49 +2,68 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Academic Data Processor</title>
+    <title>Academic Data Analysis</title>
     <style>
         body { margin: 0; background: #000; color: #0f0; font-family: monospace; overflow: hidden; }
-        #screen_container { width: 100vw; height: 100vh; display: flex; cursor: none; }
-        #screen { margin: auto; }
+        #screen_container { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        #status { position: fixed; top: 10px; left: 10px; z-index: 10; font-size: 12px; }
     </style>
 </head>
 <body>
 
-    <div id="screen_container"><div id="screen"></div></div>
+    <div id="status">System: Initializing...</div>
+    <div id="screen_container">
+        <div id="screen"></div>
+    </div>
 
-    <script src="libv86.js"></script>
+    <script src="https://copy.sh/v86/build/libv86.js"></script>
 
     <script>
-        // --- PANIC KEY: Press "~" to hide instantly ---
+        // Panic Key: Press "~" to escape
         window.addEventListener("keydown", function(e) {
             if (e.key === "~") window.location.replace("https://www.google.com");
         });
 
-        window.onload = function() {
-            // Verifying the library loaded to fix your ReferenceError
+        function startEmulator() {
+            const status = document.getElementById("status");
+            
+            // Checking if V86Starter exists
             if (typeof V86Starter === "undefined") {
-                document.body.innerHTML = "<h2 style='color:red;'>Error: libv86.js not found in GitHub repo.</h2>";
+                status.innerText = "Error: V86 Library missing. Retrying...";
+                setTimeout(startEmulator, 1000); // Retry after 1 second
                 return;
             }
 
-            var emulator = new V86Starter({
-                // Using .png extension for the wasm file to bypass basic filters
-                wasm_path: "v86.wasm", 
-                memory_size: 512 * 1024 * 1024,
-                vga_memory_size: 16 * 1024 * 1024,
-                screen_container: document.getElementById("screen"),
-                
-                // Paths to your BIOS and OS files
-                bios: { url: "bios/seabios.bin" },
-                vga_bios: { url: "bios/vgabios.bin" },
-                
-                // LIGHTWEIGHT ANDROID ISO (Link to a small version)
-                cdrom: { url: "https://archive.org/download/android-x86-4.4-r5/android-x86-4.4-r5.iso" },
-                
-                autostart: true,
-            });
-        };
+            status.innerText = "System: Loading Android OS (This takes 2-5 mins)...";
+
+            try {
+                var emulator = new V86Starter({
+                    wasm_path: "https://copy.sh/v86/build/v86.wasm",
+                    memory_size: 512 * 1024 * 1024,
+                    vga_memory_size: 16 * 1024 * 1024,
+                    screen_container: document.getElementById("screen"),
+                    
+                    // Standard BIOS files
+                    bios: { url: "https://copy.sh/v86/bios/seabios.bin" },
+                    vga_bios: { url: "https://copy.sh/v86/bios/vgabios.bin" },
+                    
+                    // LIGHTWEIGHT ANDROID 4.4 ISO
+                    cdrom: { url: "https://archive.org/download/android-x86-4.4-r5/android-x86-4.4-r5.iso" },
+                    
+                    autostart: true,
+                });
+
+                emulator.add_listener("emulator-ready", function() {
+                    status.style.display = "none";
+                });
+
+            } catch (e) {
+                status.innerText = "Crashed: " + e.message;
+            }
+        }
+
+        // Start when the page is fully ready
+        window.addEventListener("load", startEmulator);
     </script>
 </body>
 </html>
