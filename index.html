@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>System Dashboard</title>
+    <title>Research Module</title>
     <style>
         body { margin: 0; background: #000; color: #0f0; font-family: monospace; overflow: hidden; }
         #screen_container { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
@@ -10,56 +10,36 @@
     </style>
 </head>
 <body>
+    <div id="status">System: Ready. Press "~" to hide.</div>
+    <div id="screen_container"><div id="screen"></div></div>
 
-    <div id="status">System: Initializing...</div>
-    <div id="screen_container">
-        <div id="screen"></div>
-    </div>
-
-    <script src="https://lib.arvancloud.ir/v86/0.12.0/libv86.js" onload="startEmulator()" onerror="handleLoadError()"></script>
-
+    <script src="libv86.js"></script>
     <script>
-        // Panic Key: Press "~" to escape instantly
-        window.addEventListener("keydown", function(e) {
+        window.addEventListener("keydown", (e) => {
             if (e.key === "~") window.location.replace("https://www.google.com");
         });
 
-        function handleLoadError() {
-            document.getElementById("status").innerHTML = "<span style='color:red;'>Filter Block Detected. Try using a personal hotspot or renaming libv86.js to libv86.png.</span>";
-        }
-
-        function startEmulator() {
-            const status = document.getElementById("status");
-            
+        window.onload = function() {
             if (typeof V86Starter === "undefined") {
-                status.innerText = "Internal Error: Library failed to parse.";
+                document.getElementById("status").innerText = "Error: Library Load Failed.";
                 return;
             }
 
-            status.innerText = "Downloading Android OS... (Stay on this tab)";
-
             var emulator = new V86Starter({
-                // Using the official WASM build
-                wasm_path: "https://copy.sh/v86/build/v86.wasm",
+                wasm_path: "v86.wasm",
                 memory_size: 512 * 1024 * 1024,
                 vga_memory_size: 16 * 1024 * 1024,
                 screen_container: document.getElementById("screen"),
+                bios: { url: "bios/seabios.bin" },
+                vga_bios: { url: "bios/vgabios.bin" },
                 
-                // Essential BIOS files
-                bios: { url: "https://copy.sh/v86/bios/seabios.bin" },
-                vga_bios: { url: "https://copy.sh/v86/bios/vgabios.bin" },
-                
-                // Android 4.4 r5 ISO - This is the "Playable" file
-                cdrom: { url: "https://archive.org/download/android-x86-4.4-r5/android-x86-4.4-r5.iso" },
+                // We use a local image file that you will upload to GitHub
+                // Rename your .iso or .img to .png to sneak it past filters
+                hda: { url: "android.png" }, 
                 
                 autostart: true,
             });
-
-            emulator.add_listener("emulator-ready", function() {
-                status.style.display = "none";
-                console.log("Android is running.");
-            });
-        }
+        };
     </script>
 </body>
 </html>
